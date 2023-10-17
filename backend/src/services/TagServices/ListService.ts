@@ -28,7 +28,8 @@ const ListService = async ({
     whereCondition = {
       [Op.or]: [
         { name: { [Op.like]: `%${searchParam}%` } },
-        { color: { [Op.like]: `%${searchParam}%` } }
+        { color: { [Op.like]: `%${searchParam}%` } },
+		{ kanban: { [Op.like]: `%${searchParam}%` } }
       ]
     };
   }
@@ -49,6 +50,7 @@ const ListService = async ({
       'id',
       'name',
       'color',
+	  'kanban',
       [fn('count', col('ticketTags.tagId')), 'ticketsCount']
     ],
     group: ['Tag.id']

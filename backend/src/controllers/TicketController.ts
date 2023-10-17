@@ -8,6 +8,7 @@ import ListTicketsService from "../services/TicketServices/ListTicketsService";
 import ShowTicketUUIDService from "../services/TicketServices/ShowTicketFromUUIDService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
 import UpdateTicketService from "../services/TicketServices/UpdateTicketService";
+import ListTicketsServiceKanban from "../services/TicketServices/ListTicketsServiceKanban";
 
 type IndexQuery = {
   searchParam: string;
@@ -78,6 +79,63 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 
 
   });
+  return res.status(200).json({ tickets, count, hasMore });
+};
+
+export const kanban = async (req: Request, res: Response): Promise<Response> => {
+  const {
+    pageNumber,
+    status,
+    date,
+    updatedAt,
+    searchParam,
+    showAll,
+    queueIds: queueIdsStringified,
+    tags: tagIdsStringified,
+    users: userIdsStringified,
+    withUnreadMessages
+  } = req.query as IndexQuery;
+
+
+  const userId = req.user.id;
+  const { companyId } = req.user;
+
+  let queueIds: number[] = [];
+  let tagsIds: number[] = [];
+  let usersIds: number[] = [];
+
+
+  if (queueIdsStringified) {
+    queueIds = JSON.parse(queueIdsStringified);
+  }
+
+  if (tagIdsStringified) {
+    tagsIds = JSON.parse(tagIdsStringified);
+  }
+
+  if (userIdsStringified) {
+    usersIds = JSON.parse(userIdsStringified);
+  }
+
+
+  const { tickets, count, hasMore } = await ListTicketsServiceKanban({
+    searchParam,
+    tags: tagsIds,
+    users: usersIds,
+    pageNumber,
+    status,
+    date,
+    updatedAt,
+    showAll,
+    userId,
+    queueIds,
+    withUnreadMessages,
+    companyId
+
+  });
+
+  //console.log("ticket controller 82");
+  
   return res.status(200).json({ tickets, count, hasMore });
 };
 

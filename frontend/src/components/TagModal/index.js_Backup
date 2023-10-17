@@ -15,20 +15,13 @@ import DialogTitle from "@material-ui/core/DialogTitle";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import { Colorize } from "@material-ui/icons";
 import { ColorBox } from 'material-ui-color';
-import { FormControlLabel, Switch } from '@material-ui/core';
-import Select from "@material-ui/core/Select";
-import MenuItem from "@material-ui/core/MenuItem";
-import InputLabel from "@material-ui/core/InputLabel";
-import Checkbox from '@material-ui/core/Checkbox';
-
 
 import { i18n } from "../../translate/i18n";
 
 import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import { AuthContext } from "../../context/Auth/AuthContext";
-import { IconButton, InputAdornment, FormControl } from "@material-ui/core";
-
+import { IconButton, InputAdornment } from "@material-ui/core";
 
 const useStyles = makeStyles(theme => ({
 	root: {
@@ -62,11 +55,6 @@ const useStyles = makeStyles(theme => ({
 		width: 20,
 		height: 20,
 	},
-    multFieldLine: {
-    	display: 'flex',
-    	flexDirection: 'row',
-    	alignItems: 'center',
-  	},
 }));
 
 const TagSchema = Yup.object().shape({
@@ -79,13 +67,10 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
 	const classes = useStyles();
 	const { user } = useContext(AuthContext);
 	const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
-    //console.log(user);
-
 
 	const initialState = {
 		name: "",
-		color: "",
-        kanban: 0
+		color: ""
 	};
 
 	const [tag, setTag] = useState(initialState);
@@ -96,7 +81,6 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
 				if (!tagId) return;
 
 				const { data } = await api.get(`/tags/${tagId}`);
-                //console.log(data);
 				setTag(prevState => {
 					return { ...prevState, ...data };
 				});
@@ -130,16 +114,7 @@ const TagModal = ({ open, onClose, tagId, reload }) => {
 		handleClose();
 	};
 
-
-const handleKanbanChange = (e) => {
-    const kanbanValue = e.target.checked ? 1 : 0;
-    setTag((prev) => ({
-      ...prev,
-      kanban: kanbanValue,
-    }));
-  };
 	return (
-    	
 		<div className={classes.root}>
 			<Dialog
 				open={open}
@@ -211,26 +186,7 @@ const handleKanbanChange = (e) => {
 										margin="dense"
 									/>
 								</div>
-                                {(user.profile === "admin" || user.profile === "supervisor") && (
-                                <>
-								<div className={classes.multFieldLine}>
-        							<FormControlLabel
-          								control={
-            								<Checkbox
-             									checked={tag.kanban === 1}
-             									onChange={handleKanbanChange}
-              									name="kanban"
-              									color="primary"
-            								/>
-          								}
-          								label="Kanban"
-          								labelPlacement="start"
-        							/>
-      							</div>
-      							<br />
-                                </>
-								)}
-                                
+
 								{ colorPickerModalOpen && (
 									<div>
 										<ColorBox
@@ -277,7 +233,6 @@ const handleKanbanChange = (e) => {
 				</Formik>
 			</Dialog>
 		</div>
-        
 	);
 };
 

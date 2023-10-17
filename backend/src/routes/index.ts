@@ -26,6 +26,7 @@ import announcementRoutes from "./announcementRoutes";
 import chatRoutes from "./chatRoutes";
 import invoiceRoutes from "./invoicesRoutes";
 import subscriptionRoutes from "./subScriptionRoutes";
+import ticketTagRoutes from "./ticketTagRoutes";
 
 const routes = Router();
 
@@ -42,6 +43,7 @@ routes.use(queueRoutes);
 routes.use(companyRoutes);
 routes.use(planRoutes);
 routes.use(ticketNoteRoutes);
+routes.use(ticketTagRoutes);
 routes.use(quickMessageRoutes);
 routes.use(helpRoutes);
 routes.use(dashboardRoutes);

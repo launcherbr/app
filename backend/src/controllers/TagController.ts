@@ -10,6 +10,7 @@ import ShowService from "../services/TagServices/ShowService";
 import DeleteService from "../services/TagServices/DeleteService";
 import SimpleListService from "../services/TagServices/SimpleListService";
 import SyncTagService from "../services/TagServices/SyncTagsService";
+import KanbanListService from "../services/TagServices/KanbanListService"
 
 type IndexQuery = {
   searchParam?: string;
@@ -30,12 +31,13 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
 };
 
 export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { name, color } = req.body;
+  const { name, color, kanban } = req.body;
   const { companyId } = req.user;
 
   const tag = await CreateService({
     name,
     color,
+	kanban,
     companyId
   });
 
@@ -102,6 +104,14 @@ export const list = async (req: Request, res: Response): Promise<Response> => {
   const tags = await SimpleListService({ searchParam, companyId });
 
   return res.json(tags);
+};
+
+export const kanban = async (req: Request, res: Response): Promise<Response> => {
+  const { companyId } = req.user;
+
+  const tags = await KanbanListService({ companyId });
+  //console.log(tags);
+  return res.json({lista:tags});
 };
 
 export const syncTags = async (
