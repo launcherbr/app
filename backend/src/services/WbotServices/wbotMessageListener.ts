@@ -1,4 +1,4 @@
-import { join } from "path";
+import  path, { join } from "path";
 import { promisify } from "util";
 import { writeFile } from "fs";
 import * as Sentry from "@sentry/node";
@@ -17,6 +17,7 @@ import {
   WAMessageStubType,
   WAMessageUpdate,
   WASocket,
+  Chat,
 } from "@whiskeysockets/baileys";
 import Contact from "../../models/Contact";
 import Ticket from "../../models/Ticket";
@@ -48,6 +49,8 @@ import Setting from "../../models/Setting";
 import { cacheLayer } from "../../libs/cache";
 import { provider } from "./providers";
 import { debounce } from "../../helpers/Debounce";
+//import { getMessageOptions } from "./SendWhatsAppMedia";
+//import bdTemp from "./Tmp"
 
 const fs = require('fs')
 
@@ -331,7 +334,7 @@ export const getBodyMessage = (msg: proto.IWebMessageInfo): string | null => {
       ),
       liveLocationMessage: `Latitude: ${msg.message.liveLocationMessage?.degreesLatitude} - Longitude: ${msg.message.liveLocationMessage?.degreesLongitude}`,
       documentMessage: msg.message?.documentMessage?.title,
-      audioMessage: "¨¢udio",
+      audioMessage: "Audio",
       listMessage: getBodyButton(msg) || msg.message.listResponseMessage?.title,
       listResponseMessage: msg.message?.listResponseMessage?.singleSelectReply?.selectedRowId,
       reactionMessage: msg.message.reactionMessage?.text || "reaction",
@@ -649,7 +652,7 @@ export const verifyMessage = async (
     id: msg.key.id,
     ticketId: ticket.id,
     contactId: msg.key.fromMe ? undefined : contact.id,
-    body,
+    body: body,
     fromMe: msg.key.fromMe,
     mediaType: getTypeMessage(msg),
     read: msg.key.fromMe,
@@ -721,7 +724,9 @@ const isValidMsg = (msg: proto.IWebMessageInfo): boolean => {
       msgType === "protocolMessage" ||
       msgType === "listResponseMessage" ||
       msgType === "listMessage" ||
-      msgType === "viewOnceMessage";
+	  msgType === "viewOnceMessage" ||
+      msgType === "documentWithCaptionMessage";
+    console.log('tipo', ifType)
 
     if (!ifType) {
       logger.warn(`#### Nao achou o type em isValidMsg: ${msgType}
@@ -869,7 +874,7 @@ const verifyQueue = async (
     });
 
 
-    /* Tratamento para envio de mensagem quando a fila est¨¢ fora do expediente */
+    /* Tratamento para envio de mensagem quando a fila estï¿½ï¿½ fora do expediente */
     if (choosenQueue.options.length === 0) {
       const queue = await Queue.findByPk(choosenQueue.id);
       const { schedules }: any = queue;
@@ -1205,7 +1210,29 @@ const handleChartbot = async (ticket: Ticket, msg: WAMessage, wbot: Session, don
       ],
     });
 
-    if (queueOptions.length > -1) {
+    if (queueOptions.length == -1) {
+      const textMessage = {
+        text: formatBody(`${currentOption.message}`, ticket.contact),
+      };
+      const lastMessageFromMe = await Message.findOne({
+        where: {
+          ticketId: ticket.id,
+          fromMe: true,
+          body: textMessage.text
+        },
+        order: [["createdAt", "DESC"]]
+      });
+      if (lastMessageFromMe) {
+        return;
+      }
+      const sendMsg = await wbot.sendMessage(
+        `${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`,
+        textMessage
+      );
+      await verifyMessage(sendMsg, ticket, ticket.contact);
+      return
+    }
+    if (queueOptions.length > 0) {
 
       const companyId = ticket.companyId;
       const buttonActive = await Setting.findOne({
@@ -1482,7 +1509,7 @@ const handleMessage = async (
     try {
       if (!msg.key.fromMe && scheduleType) {
         /**
-         * Tratamento para envio de mensagem quando a empresa est¨¢ fora do expediente
+         * Tratamento para envio de mensagem quando a empresa estï¿½ï¿½ fora do expediente
          */
         if (
           scheduleType.value === "company" &&
@@ -1512,7 +1539,7 @@ const handleMessage = async (
         if (scheduleType.value === "queue" && ticket.queueId !== null) {
 
           /**
-           * Tratamento para envio de mensagem quando a fila est¨¢ fora do expediente
+           * Tratamento para envio de mensagem quando a fila estï¿½ï¿½ fora do expediente
            */
           const queue = await Queue.findByPk(ticket.queueId);
 
@@ -1599,7 +1626,7 @@ const handleMessage = async (
       //Fluxo fora do expediente
       if (!msg.key.fromMe && scheduleType && ticket.queueId !== null) {
         /**
-         * Tratamento para envio de mensagem quando a fila est¨¢ fora do expediente
+         * Tratamento para envio de mensagem quando a fila estï¿½ï¿½ fora do expediente
          */
         const queue = await Queue.findByPk(ticket.queueId);
 
