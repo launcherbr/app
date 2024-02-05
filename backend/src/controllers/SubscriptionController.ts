@@ -33,7 +33,6 @@ export const createSubscription = async (
   });
 
   if (!(await schema.isValid(req.body))) {
-    console.log("Erro linha 32")
     throw new AppError("Validation fails", 400);
   }
 
@@ -105,7 +104,6 @@ export const createSubscription = async (
 
     });
   } catch (error) {
-    console.log(error);
     throw new AppError("Validation fails", 400);
   }
 };
@@ -164,7 +162,7 @@ export const webhook = async (
         const invoices = await Invoices.findByPk(invoiceID);
         const companyId =invoices.companyId;
         const company = await Company.findByPk(companyId);
-    
+
         const expiresAt = new Date(company.dueDate);
         expiresAt.setDate(expiresAt.getDate() + 30);
         const date = expiresAt.toISOString().split("T")[0];

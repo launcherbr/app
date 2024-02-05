@@ -201,6 +201,9 @@ const Queues = () => {
                 {i18n.t("queues.table.color")}
               </TableCell>
               <TableCell align="center">
+                {i18n.t("queues.table.orderQueue")}
+              </TableCell>
+              <TableCell align="center">
                 {i18n.t("queues.table.greeting")}
               </TableCell>
               <TableCell align="center">
@@ -223,6 +226,17 @@ const Queues = () => {
                           alignSelf: "center",
                         }}
                       />
+                    </div>
+                  </TableCell>
+                  <TableCell align="center">
+                    <div className={classes.customTableCell}>
+                      <Typography
+                        style={{ width: 300, align: "center" }}
+                        noWrap
+                        variant="body2"
+                      >
+                        {queue.orderQueue}
+                      </Typography>
                     </div>
                   </TableCell>
                   <TableCell align="center">

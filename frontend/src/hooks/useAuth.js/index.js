@@ -74,17 +74,21 @@ const useAuth = () => {
 
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
+    if (companyId) {
+   
     const socket = socketConnection({ companyId });
 
-    socket.on(`company-${companyId}-user`, (data) => {
-      if (data.action === "update" && data.user.id === user.id) {
-        setUser(data.user);
-      }
-    });
-
+      socket.on(`company-${companyId}-user`, (data) => {
+        if (data.action === "update" && data.user.id === user.id) {
+          setUser(data.user);
+        }
+      });
+    
+    
     return () => {
       socket.disconnect();
     };
+  }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -110,7 +114,7 @@ const useAuth = () => {
       const dueDate = data.user.company.dueDate;
       const hoje = moment(moment()).format("DD/MM/yyyy");
       const vencimento = moment(dueDate).format("DD/MM/yyyy");
-      
+
       var diff = moment(dueDate).diff(moment(moment()).format());
 
       var before = moment(moment().format()).isBefore(dueDate);

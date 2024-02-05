@@ -20,6 +20,15 @@ interface WhatsappData {
   status?: string;
   isDefault?: boolean;
   token?: string;
+  //sendIdQueue?: number;
+  //timeSendQueue?: number;
+  transferQueueId?: number;
+  timeToTransfer?: number;  
+  promptId?: number;
+  maxUseBotQueues?: number;
+  timeUseBotQueues?: number;
+  expiresTicket?: number;
+  expiresInactiveMessage?: string;
 }
 
 interface QueryParams {
@@ -43,7 +52,16 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     complationMessage,
     outOfHoursMessage,
     queueIds,
-    token
+    token,
+    //timeSendQueue,
+    //sendIdQueue,
+	transferQueueId,
+	timeToTransfer,
+    promptId,
+    maxUseBotQueues,
+    timeUseBotQueues,
+    expiresTicket,
+    expiresInactiveMessage
   }: WhatsappData = req.body;
   const { companyId } = req.user;
 
@@ -56,7 +74,16 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
     outOfHoursMessage,
     queueIds,
     companyId,
-    token
+    token,
+    //timeSendQueue,
+    //sendIdQueue,
+	transferQueueId,
+	timeToTransfer,	
+    promptId,
+    maxUseBotQueues,
+    timeUseBotQueues,
+    expiresTicket,
+    expiresInactiveMessage
   });
 
   StartWhatsAppSession(whatsapp, companyId);

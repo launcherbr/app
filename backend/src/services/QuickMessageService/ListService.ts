@@ -1,11 +1,11 @@
-import { Sequelize, Op } from "sequelize";
+import { Sequelize, Op, Filterable } from "sequelize";
 import QuickMessage from "../../models/QuickMessage";
 
 interface Request {
   searchParam?: string;
   pageNumber?: string;
   companyId: number | string;
-  userId: number | string;
+  userId?: number | string;
 }
 
 interface Response {
@@ -20,24 +20,31 @@ const ListService = async ({
   companyId,
   userId
 }: Request): Promise<Response> => {
-  let whereCondition = {
-    [Op.or]: [
-      {
-        shortcode: Sequelize.where(
-          Sequelize.fn("LOWER", Sequelize.col("shortcode")),
-          "LIKE",
-          `%${searchParam.toLowerCase().trim()}%`
-        )
-      }
-    ],
-    companyId: {
-      [Op.eq]: companyId
-    },
-    userId: {
-      [Op.eq]: userId
-    }
-  };
+  const sanitizedSearchParam = searchParam.toLocaleLowerCase().trim();
 
+  let whereCondition: Filterable["where"] = {
+    // [Op.or]: [
+    //   {
+    shortcode: Sequelize.where(
+      Sequelize.fn("LOWER", Sequelize.col("shortcode")),
+      "LIKE",
+      `%${sanitizedSearchParam}%`
+    )
+    //   },
+    //   {
+    //     message: Sequelize.where(
+    //       Sequelize.fn("LOWER", Sequelize.col("message")),
+    //       "LIKE",
+    //       `%${sanitizedSearchParam}%`
+    //     )
+    //   }
+    // ]
+  };
+  whereCondition = {
+  ...whereCondition,
+  companyId,
+  userId: userId
+  }
   const limit = 20;
   const offset = limit * (+pageNumber - 1);
 

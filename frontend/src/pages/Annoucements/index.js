@@ -136,8 +136,8 @@ const Announcements = () => {
   }, [searchParam, pageNumber]);
 
   useEffect(() => {
-    const companyId = localStorage.getItem("companyId");
-    const socket = socketConnection({ companyId });
+    const companyId = user.companyId;
+    const socket = socketConnection({ companyId, userId: user.id });
 
     socket.on(`company-announcement`, (data) => {
       if (data.action === "update" || data.action === "create") {
@@ -184,9 +184,13 @@ const Announcements = () => {
     setAnnouncementModalOpen(true);
   };
 
-  const handleDeleteAnnouncement = async (announcementId) => {
+  const handleDeleteAnnouncement = async (announcement) => {
     try {
-      await api.delete(`/announcements/${announcementId}`);
+      if (announcement.mediaName)
+      await api.delete(`/announcements/${announcement.id}/media-upload`);
+
+      await api.delete(`/announcements/${announcement.id}`);
+      
       toast.success(i18n.t("announcements.toasts.deleted"));
     } catch (err) {
       toastError(err);
@@ -230,7 +234,7 @@ const Announcements = () => {
         }
         open={confirmModalOpen}
         onClose={setConfirmModalOpen}
-        onConfirm={() => handleDeleteAnnouncement(deletingAnnouncement.id)}
+        onConfirm={() => handleDeleteAnnouncement(deletingAnnouncement)}
       >
         {i18n.t("announcements.confirmationModal.deleteMessage")}
       </ConfirmationModal>
@@ -315,10 +319,10 @@ const Announcements = () => {
                     {translatePriority(announcement.priority)}
                   </TableCell>
                   <TableCell align="center">
-                    {announcement.mediaName ?? "Sem anexo"}
+                    {announcement.mediaName ?? i18n.t("quickMessages.noAttachment")}
                   </TableCell>
                   <TableCell align="center">
-                    {announcement.status ? "ativo" : "inativo"}
+                    {announcement.status ? i18n.t("announcements.active") : i18n.t("announcements.inactive")}
                   </TableCell>
                   <TableCell align="center">
                     <IconButton

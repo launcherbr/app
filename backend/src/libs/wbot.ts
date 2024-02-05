@@ -1,12 +1,13 @@
 import * as Sentry from "@sentry/node";
 import makeWASocket, {
   WASocket,
-  AuthenticationState,
+  Browsers,
   DisconnectReason,
   fetchLatestBaileysVersion,
-  AuthenticationCreds,
+  makeCacheableSignalKeyStore,
   makeInMemoryStore,
-  isJidBroadcast
+  isJidBroadcast,
+  CacheStore
 } from "@whiskeysockets/baileys";
 import makeWALegacySocket from "@whiskeysockets/baileys";
 import P from "pino";
@@ -21,6 +22,7 @@ import { getIO } from "./socket";
 import { Store } from "./store";
 import { StartWhatsAppSession } from "../services/WbotServices/StartWhatsAppSession";
 import DeleteBaileysService from "../services/BaileysServices/DeleteBaileysService";
+import NodeCache from 'node-cache';
 
 const loggerBaileys = MAIN_LOGGER.child({});
 loggerBaileys.level = "error";
@@ -91,37 +93,56 @@ export const initWASocket = async (whatsapp: Whatsapp): Promise<Session> => {
 
         const { state, saveState } = await authState(whatsapp);
 
+        const msgRetryCounterCache = new NodeCache();
+        const userDevicesCache: CacheStore = new NodeCache();
+
         wsocket = makeWASocket({
-          version,
           logger: loggerBaileys,
           printQRInTerminal: false,
-          auth: state as AuthenticationState,
-          generateHighQualityLinkPreview: false,
+          browser: Browsers.appropriate("Desktop"),
+          auth: {
+            creds: state.creds,
+            keys: makeCacheableSignalKeyStore(state.keys, logger),
+          },
+          version,
+          // defaultQueryTimeoutMs: 60000,
+          // retryRequestDelayMs: 250,
+          // keepAliveIntervalMs: 1000 * 60 * 10 * 3,
+          msgRetryCounterCache,
           shouldIgnoreJid: jid => isJidBroadcast(jid),
-          browser: ["Chat", "Chrome", "10.15.7"],
-          patchMessageBeforeSending: (message) => {
-            const requiresPatch = !!(
-                message.buttonsMessage ||
-                // || message.templateMessage
-                message.listMessage
-            );
-            if (requiresPatch) {
-                message = {
-                    viewOnceMessage: {
-                        message: {
-                            messageContextInfo: {
-                                deviceListMetadataVersion: 2,
-                                deviceListMetadata: {},
-                            },
-                            ...message,
-                        },
-                    },
-                };
-            }
+        });
 
-            return message;
-        },
-        })
+        // wsocket = makeWASocket({
+        //   version,
+        //   logger: loggerBaileys,
+        //   printQRInTerminal: false,
+        //   auth: state as AuthenticationState,
+        //   generateHighQualityLinkPreview: false,
+        //   shouldIgnoreJid: jid => isJidBroadcast(jid),
+        //   browser: ["Chat", "Chrome", "10.15.7"],
+        //   patchMessageBeforeSending: (message) => {
+        //     const requiresPatch = !!(
+        //       message.buttonsMessage ||
+        //       // || message.templateMessage
+        //       message.listMessage
+        //     );
+        //     if (requiresPatch) {
+        //       message = {
+        //         viewOnceMessage: {
+        //           message: {
+        //             messageContextInfo: {
+        //               deviceListMetadataVersion: 2,
+        //               deviceListMetadata: {},
+        //             },
+        //             ...message,
+        //           },
+        //         },
+        //       };
+        //     }
+
+        //     return message;
+        //   },
+        // })
 
         wsocket.ev.on(
           "connection.update",

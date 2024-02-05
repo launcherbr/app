@@ -30,8 +30,8 @@ import { socketConnection } from "../../services/socket";
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
     flex: 1,
-    maxHeight: 300,
-    maxWidth: 500,
+    maxHeight: 3000,
+    maxWidth: 5000,
     padding: theme.spacing(1),
     overflowY: "scroll",
     ...theme.scrollbarStyles,
@@ -40,7 +40,7 @@ const useStyles = makeStyles((theme) => ({
 
 function AnnouncementDialog({ announcement, open, handleClose }) {
   const getMediaPath = (filename) => {
-    return `${process.env.REACT_APP_BACKEND_URL}public/${filename}`;
+    return `${process.env.REACT_APP_BACKEND_URL}/public/${filename}`;
   };
   return (
     <Dialog
@@ -57,7 +57,7 @@ function AnnouncementDialog({ announcement, open, handleClose }) {
               border: "1px solid #f1f1f1",
               margin: "0 auto 20px",
               textAlign: "center",
-              width: "90%",
+              width: "400px",
               height: 300,
               backgroundImage: `url(${getMediaPath(announcement.mediaPath)})`,
               backgroundRepeat: "no-repeat",
@@ -219,7 +219,7 @@ export default function AnnouncementsPopover() {
   };
 
   const getMediaPath = (filename) => {
-    return `${process.env.REACT_APP_BACKEND_URL}public/${filename}`;
+    return `${process.env.REACT_APP_BACKEND_URL}/public/${filename}`;
   };
 
   const handleShowAnnouncementDialog = (record) => {
@@ -281,7 +281,7 @@ export default function AnnouncementsPopover() {
                 <ListItem
                   key={key}
                   style={{
-                    background: key % 2 === 0 ? "#ededed" : "white",
+                    //background: key % 2 === 0 ? "#ededed" : "white",
                     border: "1px solid #eee",
                     borderLeft: borderPriority(item.priority),
                     cursor: "pointer",

@@ -27,16 +27,32 @@ import ListIcon from "@material-ui/icons/ListAlt";
 import AnnouncementIcon from "@material-ui/icons/Announcement";
 import ForumIcon from "@material-ui/icons/Forum";
 import LocalAtmIcon from '@material-ui/icons/LocalAtm';
-import PaymentIcon from "@material-ui/icons/Payment";
-import TableChartIcon from '@material-ui/icons/TableChart';
+import RotateRight from "@material-ui/icons/RotateRight";
 import { i18n } from "../translate/i18n";
 import { WhatsAppsContext } from "../context/WhatsApp/WhatsAppsContext";
 import { AuthContext } from "../context/Auth/AuthContext";
+import LoyaltyRoundedIcon from '@material-ui/icons/LoyaltyRounded';
 import { Can } from "../components/Can";
 import { socketConnection } from "../services/socket";
 import { isArray } from "lodash";
+import TableChartIcon from '@material-ui/icons/TableChart';
 import api from "../services/api";
+import BorderColorIcon from '@material-ui/icons/BorderColor';
+import ToDoList from "../pages/ToDoList/";
 import toastError from "../errors/toastError";
+import { makeStyles } from "@material-ui/core/styles";
+import { AllInclusive, AttachFile, BlurCircular, DeviceHubOutlined, Schedule } from '@material-ui/icons';
+import usePlans from "../hooks/usePlans";
+import Typography from "@material-ui/core/Typography";
+
+const useStyles = makeStyles((theme) => ({
+  ListSubheader: {
+    height: 26,
+    marginTop: "-15px",
+    marginBottom: "-10px",
+  },
+}));
+
 
 function ListItemLink(props) {
   const { icon, primary, to, className } = props;
@@ -51,7 +67,7 @@ function ListItemLink(props) {
 
   return (
     <li>
-      <ListItem button component={renderLink} className={className}>
+      <ListItem button dense component={renderLink} className={className}>
         {icon ? <ListItemIcon>{icon}</ListItemIcon> : null}
         <ListItemText primary={primary} />
       </ListItem>
@@ -116,23 +132,51 @@ const reducer = (state, action) => {
 };
 
 const MainListItems = (props) => {
-  const { drawerClose } = props;
+  const classes = useStyles();
+  const { drawerClose, collapsed } = props;
   const { whatsApps } = useContext(WhatsAppsContext);
-  const { user } = useContext(AuthContext);
+  const { user, handleLogout } = useContext(AuthContext);
   const [connectionWarning, setConnectionWarning] = useState(false);
   const [openCampaignSubmenu, setOpenCampaignSubmenu] = useState(false);
   const [showCampaigns, setShowCampaigns] = useState(false);
-  const history = useHistory();
+  const [showKanban, setShowKanban] = useState(false);
+  const [showOpenAi, setShowOpenAi] = useState(false);
+  const [showIntegrations, setShowIntegrations] = useState(false); const history = useHistory();
+  const [showSchedules, setShowSchedules] = useState(false);
+  const [showInternalChat, setShowInternalChat] = useState(false);
+  const [showExternalApi, setShowExternalApi] = useState(false);
+
 
   const [invisible, setInvisible] = useState(true);
   const [pageNumber, setPageNumber] = useState(1);
   const [searchParam] = useState("");
   const [chats, dispatch] = useReducer(reducer, []);
+  const { getPlanCompany } = usePlans();
+ 
 
   useEffect(() => {
     dispatch({ type: "RESET" });
     setPageNumber(1);
   }, [searchParam]);
+
+  useEffect(() => {
+    async function fetchData() {
+      const companyId = user.companyId;
+      const planConfigs = await getPlanCompany(undefined, companyId);
+
+      setShowCampaigns(planConfigs.plan.useCampaigns);
+      setShowKanban(planConfigs.plan.useKanban);
+      setShowOpenAi(planConfigs.plan.useOpenAi);
+      setShowIntegrations(planConfigs.plan.useIntegrations);
+      setShowSchedules(planConfigs.plan.useSchedules);
+      setShowInternalChat(planConfigs.plan.useInternalChat);
+      setShowExternalApi(planConfigs.plan.useExternalApi);
+    }
+    fetchData();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+
 
   useEffect(() => {
     const delayDebounceFn = setTimeout(() => {
@@ -216,6 +260,11 @@ const MainListItems = (props) => {
     }
   };
 
+  const handleClickLogout = () => {
+    //handleCloseMenu();
+    handleLogout();
+  };
+
   return (
     <div onClick={drawerClose}>
       <Can
@@ -235,17 +284,23 @@ const MainListItems = (props) => {
         primary={i18n.t("mainDrawer.listItems.tickets")}
         icon={<WhatsAppIcon />}
       />
-
+	  
 	  <ListItemLink
         to="/kanban"
         primary={i18n.t("Kanban")}
         icon={<TableChartIcon />}
-      />	  
+      />
 
       <ListItemLink
         to="/quick-messages"
         primary={i18n.t("mainDrawer.listItems.quickMessages")}
         icon={<FlashOnIcon />}
+      />
+	  
+	  <ListItemLink
+        to="/todolist"
+        primary={i18n.t("Tarefas")}
+        icon={<BorderColorIcon />}
       />
 
       <ListItemLink
@@ -288,9 +343,19 @@ const MainListItems = (props) => {
         yes={() => (
           <>
             <Divider />
-            <ListSubheader inset>
+            <ListSubheader
+              hidden={collapsed}
+              style={{
+                position: "relative",
+                fontSize: "17px",
+                textAlign: "left",
+                paddingLeft: 20
+              }}
+              inset
+              color="inherit">
               {i18n.t("mainDrawer.listItems.administration")}
             </ListSubheader>
+			
             {showCampaigns && (
               <>
                 <ListItem
@@ -351,6 +416,21 @@ const MainListItems = (props) => {
                 icon={<AnnouncementIcon />}
               />
             )}
+            {showOpenAi && (
+              <ListItemLink
+                to="/prompts"
+                primary={i18n.t("mainDrawer.listItems.prompts")}
+                icon={<AllInclusive />}
+              />
+            )}
+
+            {showIntegrations && (
+              <ListItemLink
+                to="/queue-integration"
+                primary={i18n.t("mainDrawer.listItems.queueIntegration")}
+                icon={<DeviceHubOutlined />}
+              />
+            )}
             <ListItemLink
               to="/connections"
               primary={i18n.t("mainDrawer.listItems.connections")}
@@ -359,6 +439,11 @@ const MainListItems = (props) => {
                   <SyncAltIcon />
                 </Badge>
               }
+            />
+            <ListItemLink
+              to="/files"
+              primary={i18n.t("mainDrawer.listItems.files")}
+              icon={<AttachFile />}
             />
             <ListItemLink
               to="/queues"
@@ -370,27 +455,42 @@ const MainListItems = (props) => {
               primary={i18n.t("mainDrawer.listItems.users")}
               icon={<PeopleAltOutlinedIcon />}
             />
-{/*            <ListItemLink
-              to="/messages-api"
-              primary={i18n.t("mainDrawer.listItems.messagesAPI")}
-              icon={<CodeRoundedIcon />}
-            /> */}
-              <ListItemLink
-                to="/financeiro"
-                primary={i18n.t("mainDrawer.listItems.financeiro")}
-                icon={<LocalAtmIcon />}
-              />
+            {showExternalApi && (
+              <>
+                <ListItemLink
+                  to="/messages-api"
+                  primary={i18n.t("mainDrawer.listItems.messagesAPI")}
+                  icon={<CodeRoundedIcon />}
+                />
+              </>
+            )}
+            <ListItemLink
+              to="/financeiro"
+              primary={i18n.t("mainDrawer.listItems.financeiro")}
+              icon={<LocalAtmIcon />}
+            />
+
             <ListItemLink
               to="/settings"
               primary={i18n.t("mainDrawer.listItems.settings")}
               icon={<SettingsOutlinedIcon />}
             />
-{/*             <ListItemLink
-              to="/subscription"
-              primary="Assinatura"
-              icon={<PaymentIcon />}
-              //className={classes.menuItem}
-            /> */}
+			
+			
+            {!collapsed && <React.Fragment>
+              <Divider />
+              {/* 
+              // IMAGEM NO MENU
+              <Hidden only={['sm', 'xs']}>
+                <img style={{ width: "100%", padding: "10px" }} src={logo} alt="image" />            
+              </Hidden> 
+              */}
+              <Typography style={{ fontSize: "12px", padding: "10px", textAlign: "right", fontWeight: "bold" }}>
+                Versão: 4.0.0
+              </Typography>
+            </React.Fragment>
+            }
+			
           </>
         )}
       />

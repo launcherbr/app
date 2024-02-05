@@ -332,7 +332,7 @@ function Chat(props) {
     return (
       <Grid className={classes.gridContainer} container>
         <Grid className={classes.gridItem} md={3} item>
-          {user.profile === "admin" && (
+          
             <div className={classes.btnContainer}>
               <Button
                 onClick={() => {
@@ -345,7 +345,7 @@ function Chat(props) {
                 Nova
               </Button>
             </div>
-          )}
+          
           <ChatList
             chats={chats}
             pageInfo={chatsPageInfo}

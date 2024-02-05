@@ -14,14 +14,10 @@ const KanbanListService = async ({
     where: {
       kanban: 1,
       companyId: companyId,
-      // status: {
-      //   [Op.ne]: "closed",
-      // }
     },
     order: [["id", "ASC"]],
     raw: true,
   });
-  //console.log(tags);
   return tags;
 };
 

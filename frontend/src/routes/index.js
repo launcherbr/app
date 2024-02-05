@@ -20,6 +20,7 @@ import ContactLists from "../pages/ContactLists/";
 import ContactListItems from "../pages/ContactListItems/";
 // import Companies from "../pages/Companies/";
 import QuickMessages from "../pages/QuickMessages/";
+import Kanban from "../pages/Kanban";
 import { AuthProvider } from "../context/Auth/AuthContext";
 import { TicketsContextProvider } from "../context/Tickets/TicketsContext";
 import { WhatsAppsProvider } from "../context/WhatsApp/WhatsAppsContext";
@@ -30,8 +31,11 @@ import CampaignsConfig from "../pages/CampaignsConfig";
 import CampaignReport from "../pages/CampaignReport";
 import Annoucements from "../pages/Annoucements";
 import Chat from "../pages/Chat";
+import ToDoList from "../pages/ToDoList/";
 import Subscription from "../pages/Subscription/";
-import kanban from "../pages/Kanban";
+import Files from "../pages/Files/";
+import Prompts from "../pages/Prompts";
+import QueueIntegration from "../pages/QueueIntegration";
 
 const Routes = () => {
   const [showCampaigns, setShowCampaigns] = useState(false);
@@ -74,6 +78,12 @@ const Routes = () => {
                 />
                 <Route
                   exact
+                  path="/todolist"
+                  component={ToDoList}
+                  isPrivate
+                  />
+                <Route
+                  exact
                   path="/schedules"
                   component={Schedules}
                   isPrivate
@@ -81,8 +91,11 @@ const Routes = () => {
                 <Route exact path="/tags" component={Tags} isPrivate />
                 <Route exact path="/contacts" component={Contacts} isPrivate />
                 <Route exact path="/helps" component={Helps} isPrivate />
-				<Route exact path="/kanban" component={kanban} isPrivate />
                 <Route exact path="/users" component={Users} isPrivate />
+                <Route exact path="/files" component={Files} isPrivate />
+                <Route exact path="/prompts" component={Prompts} isPrivate />
+                <Route exact path="/queue-integration" component={QueueIntegration} isPrivate />
+
                 <Route
                   exact
                   path="/messages-api"
@@ -93,6 +106,12 @@ const Routes = () => {
                   exact
                   path="/settings"
                   component={SettingsCustom}
+                  isPrivate
+                />
+				        <Route 
+                  exact
+                  path="/kanban"
+                  component={Kanban}
                   isPrivate
                 />
                 <Route

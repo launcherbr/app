@@ -36,7 +36,7 @@ const wbotMonitor = async (
 
       if (content.tag === "offer") {
         const { from, id } = node.attrs;
-        //console.log(`${from} is calling you with id ${id}`);
+
       }
 
       if (content.tag === "terminate") {
@@ -87,7 +87,7 @@ const wbotMonitor = async (
           await ticket.update({
             lastMessage: body,
           });
-          
+
 
           if(ticket.status === "closed") {
             await ticket.update({
@@ -101,7 +101,7 @@ const wbotMonitor = async (
     });
 
     wbot.ev.on("contacts.upsert", async (contacts: BContact[]) => {
-      console.log("upsert", contacts);
+
       await createOrUpdateBaileysService({
         whatsappId: whatsapp.id,
         contacts,

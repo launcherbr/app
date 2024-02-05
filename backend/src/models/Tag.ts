@@ -46,7 +46,7 @@ class Tag extends Model<Tag> {
 
   @UpdatedAt
   updatedAt: Date;
-  
+
   @Column
   kanban: number;
 }

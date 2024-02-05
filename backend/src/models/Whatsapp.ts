@@ -19,6 +19,8 @@ import Queue from "./Queue";
 import Ticket from "./Ticket";
 import WhatsappQueue from "./WhatsappQueue";
 import Company from "./Company";
+import Prompt from "./Prompt";
+import QueueIntegrations from "./QueueIntegrations";
 
 @Table
 class Whatsapp extends Model<Whatsapp> {
@@ -102,6 +104,45 @@ class Whatsapp extends Model<Whatsapp> {
 
   @Column
   token: string;
+
+  //@Default(0)
+  //@Column
+  //timeSendQueue: number;
+
+  //@Column
+  //sendIdQueue: number;
+  
+  @Column
+  transferQueueId: number;
+
+  @Column
+  timeToTransfer: number;  
+
+  @ForeignKey(() => Prompt)
+  @Column
+  promptId: number;
+
+  @BelongsTo(() => Prompt)
+  prompt: Prompt;
+
+  @ForeignKey(() => QueueIntegrations)
+  @Column
+  integrationId: number;
+
+  @BelongsTo(() => QueueIntegrations)
+  queueIntegrations: QueueIntegrations;
+
+  @Column
+  maxUseBotQueues: number;
+
+  @Column
+  timeUseBotQueues: string;
+
+  @Column
+  expiresTicket: number;
+
+  @Column
+  expiresInactiveMessage: string;
 }
 
 export default Whatsapp;

@@ -8,18 +8,6 @@ import { i18n } from "../../translate/i18n";
 import { useHistory } from 'react-router-dom';
 import { socketConnection } from "../../services/socket";
 
-/*
-
-
-CÓDIGO DESENVOLVIDO POR Jáder Oliveira
-PROÍBIDA A VENDA TOTAL OU PARCIAL DESTE CÓDIGO
-CONTATO: jaderoliveiraa@gmail.com
-TELEFONE: +55 51 9323-1592
-
-
-*/
-
-
 const useStyles = makeStyles(theme => ({
   root: {
     display: "flex",
@@ -34,10 +22,8 @@ const useStyles = makeStyles(theme => ({
     fontWeight: "bold",
     borderRadius: "5px",
   },
-
+  
 }));
-
-
 
 const Kanban = () => {
   const classes = useStyles();
@@ -51,8 +37,8 @@ const Kanban = () => {
   const fetchTags = async () => {
     try {
       const response = await api.get("/tags/kanban");
-      const fetchedTags = response.data.lista || [];
-      //console.log(response);
+      const fetchedTags = response.data.lista || []; 
+
       setTags(fetchedTags);
 
       // Fetch tickets after fetching tags
@@ -66,7 +52,10 @@ const Kanban = () => {
     fetchTags();
   }, []);
 
-  const [file, setFile] = useState({ lanes: [] });
+  const [file, setFile] = useState({
+    lanes: []
+  });
+
 
   const [tickets, setTickets] = useState([]);
   const { user } = useContext(AuthContext);
@@ -75,7 +64,8 @@ const Kanban = () => {
 
   const fetchTickets = async (jsonString) => {
     try {
-      const { data } = await api.get("/tickets/kanban", {
+      
+      const { data } = await api.get("/ticket/kanban", {
         params: {
           queueIds: JSON.stringify(jsonString),
           teste: true
@@ -88,71 +78,34 @@ const Kanban = () => {
     }
   };
 
-  /*
-  
-    const reloadKanbanData = useCallback(async () => {
-      await fetchTags();
-      await fetchTickets(jsonString);
-    }, [fetchTags, fetchTickets, jsonString]);
-  
-    useEffect(() => {
-      if (isInitialLoadComplete) {
-        reloadKanbanData();
-      } else {
-        setIsInitialLoadComplete(true);
-      }
-    }, [isInitialLoadComplete, reloadKanbanData]);
-  
-    useEffect(() => {
-      const companyId = localStorage.getItem("companyId");
-      const socket = socketConnection({ companyId });
-  
-      socket.on("connect", () => socket.emit("joinNotification"));
-      socket.on(`company-${companyId}-contact`, (data) => {
-        if (data.action === "updateUnread") {
-          console.log("Received WebSocket data:", data);
-          setReloadData(true);
-        }
-      });
-  
-      return () => {
-        socket.disconnect();
-      };
-    }, []);
-  
-    useEffect(() => {
-      if (reloadData && isInitialLoadComplete) {
-        reloadKanbanData();
-        setReloadData(false);
-      }
-    }, [reloadData, isInitialLoadComplete, reloadKanbanData]);
-  
-  
-  */
 
   const popularCards = (jsonString) => {
     const filteredTickets = tickets.filter(ticket => ticket.tags.length === 0);
 
-    //console.log(filteredTickets);
-
     const lanes = [
       {
         id: "lane0",
-        title: "Em Aberto",
+        title: i18n.t("Em aberto"),
         label: "0",
         cards: filteredTickets.map(ticket => ({
           id: ticket.id.toString(),
           label: "Ticket nº " + ticket.id.toString(),
           description: (
-            <div>
-              <p>
-                {ticket.contact.number}
-                <br />
-                {ticket.lastMessage}
-              </p>
-              <button className={classes.button} onClick={() => handleCardClick(ticket.uuid)}>Ver Ticket</button>
-            </div>
-          ),
+              <div>
+                <p>
+                  {ticket.contact.number}
+                  <br />
+                  {ticket.lastMessage}
+                </p>
+                <button 
+                  className={classes.button} 
+                  onClick={() => {
+                    handleCardClick(ticket.uuid)
+                  }}>
+                    Ver Ticket
+                </button>
+              </div>
+            ),
           title: ticket.contact.name,
           draggable: true,
           href: "/tickets/" + ticket.uuid,
@@ -178,12 +131,19 @@ const Kanban = () => {
                   <br />
                   {ticket.lastMessage}
                 </p>
-                <button className={classes.button} onClick={() => handleCardClick(ticket.uuid)}>Ver Ticket</button>
+                <button 
+                  className={classes.button} 
+                  onClick={() => {
+                    
+                    handleCardClick(ticket.uuid)
+                  }}>
+                    Ver Ticket
+                </button>
               </div>
             ),
             title: ticket.contact.name,
             draggable: true,
-            href: "/tickets/" + ticket.uuid,
+            href: "/tickets/" + ticket.uuid,          
           })),
           style: { backgroundColor: tag.color, color: "white" }
         };
@@ -193,42 +153,35 @@ const Kanban = () => {
     setFile({ lanes });
   };
 
-  const handleCardClick = (uuid) => {
+  const handleCardClick = (uuid) => {  
     //console.log("Clicked on card with UUID:", uuid);
     history.push('/tickets/' + uuid);
   };
 
   useEffect(() => {
     popularCards(jsonString);
-  }, [tags, tickets, reloadData]);
-
-
-
+}, [tags, tickets, reloadData]);
 
   const handleCardMove = async (cardId, sourceLaneId, targetLaneId) => {
     try {
-
-
-      await api.delete(`/ticket-tags/${targetLaneId}`);
-
-      await api.put(`/ticket-tags/${targetLaneId}/${sourceLaneId}`);
-      toast.success('Etiqueta do ticket adicionada com Sucesso!');
+        
+          await api.delete(`/ticket-tags/${targetLaneId}`);
+        toast.success('Ticket Tag Removido!');
+          await api.put(`/ticket-tags/${targetLaneId}/${sourceLaneId}`);
+        toast.success('Ticket Tag Adicionado com Sucesso!');
 
     } catch (err) {
       console.log(err);
     }
   };
 
-
-
-
   return (
     <div className={classes.root}>
-      <Board
-        data={file}
-        onCardMoveAcrossLanes={handleCardMove}
-        style={{ backgroundColor: 'rgba(252, 252, 252, 0.03)' }}
-      />
+      <Board 
+		data={file} 
+		onCardMoveAcrossLanes={handleCardMove}
+		style={{backgroundColor: 'rgba(252, 252, 252, 0.03)'}}
+    />
     </div>
   );
 };

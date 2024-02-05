@@ -85,18 +85,10 @@ const ListTicketsServiceKanban = async ({
     whereCondition = { queueId: { [Op.or]: [queueIds, null] } };
   }
 
-  if (status) {
-    whereCondition = {
-      ...whereCondition,
-      status: { [Op.ne]: "closed" },
-    };
-
-  } else{
-    whereCondition = {
-      ...whereCondition,
-      status: { [Op.ne]: "closed" },
-    };
-  }
+  whereCondition = {
+    ...whereCondition,
+    status: { [Op.or]: ["pending", "open"] }
+  };
 
   if (searchParam) {
     const sanitizedSearchParam = searchParam.toLocaleLowerCase().trim();
@@ -230,7 +222,6 @@ const ListTicketsServiceKanban = async ({
     order: [["updatedAt", "DESC"]],
     subQuery: false
   });
-
   const hasMore = count > offset + tickets.length;
 
   return {

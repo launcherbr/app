@@ -184,7 +184,7 @@ const useStyles = makeStyles((theme) => ({
   }
 }));
   {/*PLW DESIGN INSERIDO O dentro do const handleChangeTab*/}
-  const TicketListItemCustom = ({handleChangeTab, ticket }) => {
+  const TicketListItemCustom = ({ ticket }) => {
   const classes = useStyles();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
@@ -228,7 +228,10 @@ const useStyles = makeStyles((theme) => ({
       await api.put(`/tickets/${id}`, {
         status: "closed",
         userId: user?.id,
-        queueId: ticket?.queue?.id
+        queueId: ticket?.queue?.id,
+        useIntegration: false,
+        promptId: null,
+        integrationId: null
       });
     } catch (err) {
       setLoading(false);
@@ -255,7 +258,7 @@ const useStyles = makeStyles((theme) => ({
     if (isMounted.current) {
       setLoading(false);
     }
-    history.push(`/tickets/`);
+    history.push(`/tickets/${ticket.uuid}`);
   };
 
     const handleAcepptTicket = async (id) => {
@@ -265,22 +268,27 @@ const useStyles = makeStyles((theme) => ({
                 status: "open",
                 userId: user?.id,
             });
-
+            
             let settingIndex;
 
             try {
                 const { data } = await api.get("/settings/");
+                
                 settingIndex = data.filter((s) => s.key === "sendGreetingAccepted");
+                
             } catch (err) {
                 toastError(err);
+                   
             }
-
+            
             if (settingIndex[0].value === "enabled" && !ticket.isGroup) {
                 handleSendMessage(ticket.id);
+                
             }
 
         } catch (err) {
             setLoading(false);
+            
             toastError(err);
         }
         if (isMounted.current) {
@@ -288,11 +296,12 @@ const useStyles = makeStyles((theme) => ({
         }
 
         // handleChangeTab(null, "tickets");
-        handleChangeTab(null, "open");
+        // handleChangeTab(null, "open");
         history.push(`/tickets/${ticket.uuid}`);
     };
 	
 	    const handleSendMessage = async (id) => {
+        
         const msg = `{{ms}} *{{name}}*, meu nome é *${user?.name}* e agora vou prosseguir com seu atendimento!`;
         const message = {
             read: 1,
@@ -304,6 +313,7 @@ const useStyles = makeStyles((theme) => ({
             await api.post(`/messages/${id}`, message);
         } catch (err) {
             toastError(err);
+            
         }
     };
 	{/*CÓDIGO NOVO SAUDAÇÃO*/}
@@ -496,7 +506,7 @@ const useStyles = makeStyles((theme) => ({
               size="small"
               loading={loading}
 			  //PLW DESIGN INSERIDO O handleChangeTab
-              onClick={e => handleAcepptTicket(ticket.id, handleChangeTab)}
+              onClick={e => handleAcepptTicket(ticket.id)}
             >
               {i18n.t("ticketsList.buttons.accept")}
             </ButtonWithSpinner>

@@ -9,7 +9,7 @@ const ListQueuesService = async ({ companyId }: Request): Promise<Queue[]> => {
     where: {
       companyId
     },
-    order: [["name", "ASC"]]
+    order: [["orderQueue", "ASC"]]
   });
 
   return queues;

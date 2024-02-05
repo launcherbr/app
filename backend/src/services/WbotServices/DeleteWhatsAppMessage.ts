@@ -41,7 +41,6 @@ const DeleteWhatsAppMessage = async (messageId: string): Promise<Message> => {
     });
 
   } catch (err) {
-    console.log(err);
     throw new AppError("ERR_DELETE_WAPP_MSG");
   }
   await message.update({ isDeleted: true });

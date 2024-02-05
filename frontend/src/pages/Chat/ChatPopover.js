@@ -26,6 +26,7 @@ import { AuthContext } from "../../context/Auth/AuthContext";
 
 import notifySound from "../../assets/chat_notify.mp3";
 import useSound from "use-sound";
+import { i18n } from "../../translate/i18n";
 
 const useStyles = makeStyles((theme) => ({
   mainPaper: {
@@ -137,11 +138,13 @@ export default function ChatPopover() {
   useEffect(() => {
     const companyId = localStorage.getItem("companyId");
     const socket = socketConnection({ companyId });
-
+    
     socket.on(`company-${companyId}-chat`, (data) => {
       if (data.action === "new-message") {
         dispatch({ type: "CHANGE_CHAT", payload: data });
-        if (data.newMessage.senderId !== user.id) {
+        const userIds = data.newMessage.chat.users.map(userObj => userObj.userId);
+
+        if (userIds.includes(user.id) && data.newMessage.senderId !== user.id) {
           soundAlertRef.current();
         }
       }
@@ -277,7 +280,7 @@ export default function ChatPopover() {
                 </ListItem>
               ))}
             {isArray(chats) && chats.length === 0 && (
-              <ListItemText primary="Nenhum registro" />
+              <ListItemText primary={i18n.t("mainDrawer.appBar.notRegister")} />
             )}
           </List>
         </Paper>

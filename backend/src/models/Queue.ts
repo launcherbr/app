@@ -22,6 +22,8 @@ import Company from "./Company";
 import Whatsapp from "./Whatsapp";
 import WhatsappQueue from "./WhatsappQueue";
 import QueueOption from "./QueueOption";
+import Prompt from "./Prompt";
+import QueueIntegrations from "./QueueIntegrations";
 
 @Table
 class Queue extends Model<Queue> {
@@ -78,6 +80,24 @@ class Queue extends Model<Queue> {
     hooks: true
   })
   options: QueueOption[];
+
+  @Column
+  orderQueue: number;
+
+  
+  @ForeignKey(() => QueueIntegrations)
+  @Column
+  integrationId: number;
+
+  @BelongsTo(() => QueueIntegrations)
+  queueIntegrations: QueueIntegrations;
+
+  @ForeignKey(() => Prompt)
+  @Column
+  promptId: number;
+
+  @BelongsTo(() => Prompt)
+  prompt: Prompt;
 }
 
 export default Queue;

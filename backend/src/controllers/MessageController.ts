@@ -7,6 +7,7 @@ import Message from "../models/Message";
 import Queue from "../models/Queue";
 import User from "../models/User";
 import Whatsapp from "../models/Whatsapp";
+import formatBody from "../helpers/Mustache";
 
 import ListMessagesService from "../services/MessageServices/ListMessagesService";
 import ShowTicketService from "../services/TicketServices/ShowTicketService";
@@ -18,7 +19,7 @@ import SendWhatsAppMessage from "../services/WbotServices/SendWhatsAppMessage";
 import CheckContactNumber from "../services/WbotServices/CheckNumber";
 import CheckIsValidContact from "../services/WbotServices/CheckIsValidContact";
 import GetProfilePicUrl from "../services/WbotServices/GetProfilePicUrl";
-import CreateOrUpdateContactService from "../services/ContactServices/CreateOrUpdateContactService"; 
+import CreateOrUpdateContactService from "../services/ContactServices/CreateOrUpdateContactService";
 type IndexQuery = {
   pageNumber: string;
 };
@@ -29,6 +30,7 @@ type MessageData = {
   read: boolean;
   quotedMsg?: Message;
   number?: string;
+  closeTicket?: true;
 };
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -70,8 +72,8 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
 
   if (medias) {
     await Promise.all(
-      medias.map(async (media: Express.Multer.File) => {
-        await SendWhatsAppMedia({ media, ticket });
+      medias.map(async (media: Express.Multer.File, index) => {
+        await SendWhatsAppMedia({ media, ticket, body: Array.isArray(body) ? body[index] : body });
       })
     );
   } else {
@@ -136,10 +138,7 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
 
     const contact = await CreateOrUpdateContactService(contactData);
 
-    const createTicket = await FindOrCreateTicketService(contact, whatsapp.id!, 0, companyId);
-
-    const ticket = await ShowTicketService(createTicket.id, companyId);
-  
+    const ticket = await FindOrCreateTicketService(contact, whatsapp.id!, 0, companyId);
 
     if (medias) {
       await Promise.all(
@@ -150,8 +149,9 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
               whatsappId,
               data: {
                 number,
-                body: media.originalname,
-                mediaPath: media.path
+                body: body ? formatBody(body, contact) : media.originalname,
+                mediaPath: media.path,
+                fileName: media.originalname
               }
             },
             { removeOnComplete: true, attempts: 3 }
@@ -159,7 +159,15 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
         })
       );
     } else {
-      await SendWhatsAppMessage({ body, ticket });
+      await SendWhatsAppMessage({ body: formatBody(body, contact), ticket });
+
+      await ticket.update({
+        lastMessage: body,
+      });
+
+    }
+
+    if (messageData.closeTicket) {
       setTimeout(async () => {
         await UpdateTicketService({
           ticketId: ticket.id,
@@ -167,24 +175,8 @@ export const send = async (req: Request, res: Response): Promise<Response> => {
           companyId
         });
       }, 1000);
-      await createTicket.update({
-        lastMessage: body,
-      });
-/*       req.app.get("queues").messageQueue.add(
-        "SendMessage",
-        {
-          whatsappId,
-          data: {
-            number,
-            body
-          }
-        },
-
-        { removeOnComplete: false, attempts: 3 }
-
-      ); */
     }
-
+    
     SetTicketMessagesAsRead(ticket);
 
     return res.send({ mensagem: "Mensagem enviada" });

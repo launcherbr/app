@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 // import { getIO } from "../libs/socket";
 import AppError from "../errors/AppError";
 import Company from "../models/Company";
+import authConfig from "../config/auth";
 
 import ListCompaniesService from "../services/CompanyService/ListCompaniesService";
 import CreateCompanyService from "../services/CompanyService/CreateCompanyService";
@@ -11,11 +12,24 @@ import ShowCompanyService from "../services/CompanyService/ShowCompanyService";
 import UpdateSchedulesService from "../services/CompanyService/UpdateSchedulesService";
 import DeleteCompanyService from "../services/CompanyService/DeleteCompanyService";
 import FindAllCompaniesService from "../services/CompanyService/FindAllCompaniesService";
+import { verify } from "jsonwebtoken";
+import User from "../models/User";
+import ShowPlanCompanyService from "../services/CompanyService/ShowPlanCompanyService";
+import ListCompaniesPlanService from "../services/CompanyService/ListCompaniesPlanService";
 
 type IndexQuery = {
   searchParam: string;
   pageNumber: string;
 };
+
+interface TokenPayload {
+  id: string;
+  username: string;
+  profile: string;
+  companyId: number;
+  iat: number;
+  exp: number;
+}
 
 type CompanyData = {
   name: string;
@@ -123,4 +137,44 @@ export const remove = async (
   const company = await DeleteCompanyService(id);
 
   return res.status(200).json(company);
+};
+
+export const listPlan = async (req: Request, res: Response): Promise<Response> => {
+  const { id } = req.params;
+
+  const authHeader = req.headers.authorization;
+  const [, token] = authHeader.split(" ");
+  const decoded = verify(token, authConfig.secret);
+  const { id: requestUserId, profile, companyId } = decoded as TokenPayload;
+  const requestUser = await User.findByPk(requestUserId);
+
+  if (requestUser.super === true) {
+    const company = await ShowPlanCompanyService(id);
+    return res.status(200).json(company);
+  } else if (companyId.toString() !== id) {
+    return res.status(400).json({ error: "Você não possui permissão para acessar este recurso!" });
+  } else {
+    const company = await ShowPlanCompanyService(id);
+    return res.status(200).json(company);
+  }
+
+};
+
+export const indexPlan = async (req: Request, res: Response): Promise<Response> => {
+  const { searchParam, pageNumber } = req.query as IndexQuery;
+
+  const authHeader = req.headers.authorization;
+  const [, token] = authHeader.split(" ");
+  const decoded = verify(token, authConfig.secret);
+  const { id, profile, companyId } = decoded as TokenPayload;
+  // const company = await Company.findByPk(companyId);
+  const requestUser = await User.findByPk(id);
+
+  if (requestUser.super === true) {
+    const companies = await ListCompaniesPlanService();
+    return res.json({ companies });
+  } else {
+    return res.status(400).json({ error: "Você não possui permissão para acessar este recurso!" });
+  }
+
 };

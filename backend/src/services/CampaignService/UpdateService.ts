@@ -21,6 +21,7 @@ interface Data {
   confirmationMessage3?: string;
   confirmationMessage4?: string;
   confirmationMessage5?: string;
+  fileListId: number;
 }
 
 const UpdateService = async (data: Data): Promise<Campaign> => {

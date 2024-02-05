@@ -14,9 +14,22 @@ export const store = async (req: Request, res: Response): Promise<Response> => {
   }
 };
 
+/*
 export const remove = async (req: Request, res: Response): Promise<Response> => {
   const { ticketId } = req.params;
 
+
+
+  try {
+    await TicketTag.destroy({ where: { ticketId } });
+    return res.status(200).json({ message: 'Ticket tags removed successfully.' });
+  } catch (error) {
+    return res.status(500).json({ error: 'Failed to remove ticket tags.' });
+  }
+};
+*/
+export const remove = async (req: Request, res: Response): Promise<Response> => {
+  const { ticketId } = req.params;
 
 
   try {
@@ -34,6 +47,7 @@ export const remove = async (req: Request, res: Response): Promise<Response> => 
 
     // Remove the tagIds with kanban = 1 from TicketTags
     const tagIdsWithKanbanOne = tagsWithKanbanOne.map((tag) => tag.id);
+    if (tagIdsWithKanbanOne)
     await TicketTag.destroy({ where: { ticketId, tagId: tagIdsWithKanbanOne } });
 
     return res.status(200).json({ message: 'Ticket tags removed successfully.' });

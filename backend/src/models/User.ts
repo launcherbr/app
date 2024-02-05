@@ -21,6 +21,7 @@ import Queue from "./Queue";
 import UserQueue from "./UserQueue";
 import Company from "./Company";
 import QuickMessage from "./QuickMessage";
+import Whatsapp from "./Whatsapp";
 
 @Table
 class User extends Model<User> {
@@ -80,6 +81,13 @@ class User extends Model<User> {
     hooks: true
   })
   quickMessages: QuickMessage[];
+
+  @ForeignKey(() => Whatsapp)
+  @Column
+  whatsappId: number;
+
+  @BelongsTo(() => Whatsapp)
+  whatsapp: Whatsapp;
 
   @BeforeUpdate
   @BeforeCreate

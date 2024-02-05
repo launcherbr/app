@@ -20,10 +20,14 @@ import api from "../../services/api";
 import toastError from "../../errors/toastError";
 import ColorPicker from "../ColorPicker";
 import {
+  FormControl,
   Grid,
   IconButton,
   InputAdornment,
+  InputLabel,
+  MenuItem,
   Paper,
+  Select,
   Tab,
   Tabs,
 } from "@material-ui/core";
@@ -80,6 +84,9 @@ const QueueModal = ({ open, onClose, queueId }) => {
     color: "",
     greetingMessage: "",
     outOfHoursMessage: "",
+    orderQueue: "",
+    integrationId: "",
+    promptId: ""
   };
 
   const [colorPickerModalOpen, setColorPickerModalOpen] = useState(false);
@@ -87,16 +94,30 @@ const QueueModal = ({ open, onClose, queueId }) => {
   const [tab, setTab] = useState(0);
   const [schedulesEnabled, setSchedulesEnabled] = useState(false);
   const greetingRef = useRef();
+  const [integrations, setIntegrations] = useState([]);
 
   const [schedules, setSchedules] = useState([
-    { weekday: "Segunda-feira",weekdayEn: "monday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Terça-feira",weekdayEn: "tuesday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Quarta-feira",weekdayEn: "wednesday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Quinta-feira",weekdayEn: "thursday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Sexta-feira", weekdayEn: "friday",startTime: "08:00",endTime: "18:00",},
-    { weekday: "Sábado", weekdayEn: "saturday",startTime: "08:00",endTime: "12:00",},
-    { weekday: "Domingo", weekdayEn: "sunday",startTime: "00:00",endTime: "00:00",},
+    { weekday: "Segunda-feira", weekdayEn: "monday", startTime: "08:00", endTime: "18:00", },
+    { weekday: "Terça-feira", weekdayEn: "tuesday", startTime: "08:00", endTime: "18:00", },
+    { weekday: "Quarta-feira", weekdayEn: "wednesday", startTime: "08:00", endTime: "18:00", },
+    { weekday: "Quinta-feira", weekdayEn: "thursday", startTime: "08:00", endTime: "18:00", },
+    { weekday: "Sexta-feira", weekdayEn: "friday", startTime: "08:00", endTime: "18:00", },
+    { weekday: "Sábado", weekdayEn: "saturday", startTime: "08:00", endTime: "12:00", },
+    { weekday: "Domingo", weekdayEn: "sunday", startTime: "00:00", endTime: "00:00", },
   ]);
+  const [selectedPrompt, setSelectedPrompt] = useState(null);
+  const [prompts, setPrompts] = useState([]);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { data } = await api.get("/prompt");
+        setPrompts(data.prompts);
+      } catch (err) {
+        toastError(err);
+      }
+    })();
+  }, []);
 
   useEffect(() => {
     api.get(`/settings`).then(({ data }) => {
@@ -111,12 +132,26 @@ const QueueModal = ({ open, onClose, queueId }) => {
 
   useEffect(() => {
     (async () => {
+      try {
+        const { data } = await api.get("/queueIntegration");
+
+        setIntegrations(data.queueIntegrations);
+      } catch (err) {
+        toastError(err);
+      }
+    })();
+  }, []);
+
+  useEffect(() => {
+    (async () => {
       if (!queueId) return;
       try {
         const { data } = await api.get(`/queue/${queueId}`);
         setQueue((prevState) => {
           return { ...prevState, ...data };
         });
+        data.promptId ? setSelectedPrompt(data.promptId) : setSelectedPrompt(null);
+
         setSchedules(data.schedules);
       } catch (err) {
         toastError(err);
@@ -128,6 +163,9 @@ const QueueModal = ({ open, onClose, queueId }) => {
         name: "",
         color: "",
         greetingMessage: "",
+        outOfHoursMessage: "",
+        orderQueue: "",
+        integrationId: ""
       });
     };
   }, [queueId, open]);
@@ -140,9 +178,13 @@ const QueueModal = ({ open, onClose, queueId }) => {
   const handleSaveQueue = async (values) => {
     try {
       if (queueId) {
-        await api.put(`/queue/${queueId}`, { ...values, schedules });
+        await api.put(`/queue/${queueId}`, {
+          ...values, schedules, promptId: selectedPrompt ? selectedPrompt : null
+        });
       } else {
-        await api.post("/queue", { ...values, schedules });
+        await api.post("/queue", {
+          ...values, schedules, promptId: selectedPrompt ? selectedPrompt : null
+        });
       }
       toast.success("Queue saved successfully");
       handleClose();
@@ -155,6 +197,10 @@ const QueueModal = ({ open, onClose, queueId }) => {
     toast.success("Clique em salvar para registar as alterações");
     setSchedules(values);
     setTab(0);
+  };
+
+  const handleChangePrompt = (e) => {
+    setSelectedPrompt(e.target.value);
   };
 
   return (
@@ -252,46 +298,125 @@ const QueueModal = ({ open, onClose, queueId }) => {
                         });
                       }}
                     />
+                    <Field
+                      as={TextField}
+                      label={i18n.t("queueModal.form.orderQueue")}
+                      name="orderQueue"
+                      type="orderQueue"
+                      error={touched.orderQueue && Boolean(errors.orderQueue)}
+                      helperText={touched.orderQueue && errors.orderQueue}
+                      variant="outlined"
+                      margin="dense"
+                      className={classes.textField1}
+                    />
+                    <div>
+                      <FormControl
+                        variant="outlined"
+                        margin="dense"
+                        className={classes.FormControl}
+                        fullWidth
+                      >
+                        <InputLabel id="integrationId-selection-label">
+                          {i18n.t("queueModal.form.integrationId")}
+                        </InputLabel>
+                        <Field
+                          as={Select}
+                          label={i18n.t("queueModal.form.integrationId")}
+                          name="integrationId"
+                          id="integrationId"
+                          placeholder={i18n.t("queueModal.form.integrationId")}
+                          labelId="integrationId-selection-label"
+                          value={values.integrationId || ""}
+                        >
+                          <MenuItem value={""} >{"Nenhum"}</MenuItem>
+                          {integrations.map((integration) => (
+                            <MenuItem key={integration.id} value={integration.id}>
+                              {integration.name}
+                            </MenuItem>
+                          ))}
+                        </Field>
+
+                      </FormControl>
+                      <FormControl
+                        margin="dense"
+                        variant="outlined"
+                        fullWidth
+                      >
+                        <InputLabel>
+                          {i18n.t("whatsappModal.form.prompt")}
+                        </InputLabel>
+                        <Select
+                          labelId="dialog-select-prompt-label"
+                          id="dialog-select-prompt"
+                          name="promptId"
+                          value={selectedPrompt || ""}
+                          onChange={handleChangePrompt}
+                          label={i18n.t("whatsappModal.form.prompt")}
+                          fullWidth
+                          MenuProps={{
+                            anchorOrigin: {
+                              vertical: "bottom",
+                              horizontal: "left",
+                            },
+                            transformOrigin: {
+                              vertical: "top",
+                              horizontal: "left",
+                            },
+                            getContentAnchorEl: null,
+                          }}
+                        >
+                          {prompts.map((prompt) => (
+                            <MenuItem
+                              key={prompt.id}
+                              value={prompt.id}
+                            >
+                              {prompt.name}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </div>
                     <div style={{ marginTop: 5 }}>
-                          <Field
-                            as={TextField}
-                            label={i18n.t("queueModal.form.greetingMessage")}
-                            type="greetingMessage"
-                            multiline
-                            inputRef={greetingRef}
-                            rows={5}
-                            fullWidth
-                            name="greetingMessage"
-                            error={
-                              touched.greetingMessage &&
-                              Boolean(errors.greetingMessage)
-                            }
-                            helperText={
-                              touched.greetingMessage && errors.greetingMessage
-                            }
-                            variant="outlined"
-                            margin="dense"
-                          />
-                        {schedulesEnabled && (
-                            <Field
-                              as={TextField}
-                              label={i18n.t("queueModal.form.outOfHoursMessage")}
-                              type="outOfHoursMessage"
-                              multiline
-                              rows={5}
-                              fullWidth
-                              name="outOfHoursMessage"
-                              error={
-                                touched.outOfHoursMessage &&
-                                Boolean(errors.outOfHoursMessage)
-                              }
-                              helperText={
-                                touched.outOfHoursMessage && errors.outOfHoursMessage
-                              }
-                              variant="outlined"
-                              margin="dense"
-                            />
-                        )}
+                      <Field
+                        as={TextField}
+                        label={i18n.t("queueModal.form.greetingMessage")}
+                        type="greetingMessage"
+                        multiline
+                        inputRef={greetingRef}
+                        rows={5}
+                        fullWidth
+                        name="greetingMessage"
+                        error={
+                          touched.greetingMessage &&
+                          Boolean(errors.greetingMessage)
+                        }
+                        helperText={
+                          touched.greetingMessage && errors.greetingMessage
+                        }
+                        variant="outlined"
+                        margin="dense"
+                      />
+                      {schedulesEnabled && (
+                        <Field
+                          as={TextField}
+                          label={i18n.t("queueModal.form.outOfHoursMessage")}
+                          type="outOfHoursMessage"
+                          multiline
+                          inputRef={greetingRef}
+                          rows={5}
+                          fullWidth
+                          name="outOfHoursMessage"
+                          error={
+                            touched.outOfHoursMessage &&
+                            Boolean(errors.outOfHoursMessage)
+                          }
+                          helperText={
+                            touched.outOfHoursMessage && errors.outOfHoursMessage
+                          }
+                          variant="outlined"
+                          margin="dense"
+                        />
+                      )}
                     </div>
                     <QueueOptions queueId={queueId} />
                   </DialogContent>

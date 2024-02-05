@@ -8,6 +8,10 @@ import ListService from "../services/ScheduleServices/ListService";
 import UpdateService from "../services/ScheduleServices/UpdateService";
 import ShowService from "../services/ScheduleServices/ShowService";
 import DeleteService from "../services/ScheduleServices/DeleteService";
+import Schedule from "../models/Schedule";
+import path from "path";
+import fs from "fs";
+import { head } from "lodash";
 
 type IndexQuery = {
   searchParam?: string;
@@ -105,4 +109,46 @@ export const remove = async (
   });
 
   return res.status(200).json({ message: "Schedule deleted" });
+};
+
+export const mediaUpload = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { id } = req.params;
+  const files = req.files as Express.Multer.File[];
+  const file = head(files);
+
+  try {
+    const schedule = await Schedule.findByPk(id);
+    schedule.mediaPath = file.filename;
+    schedule.mediaName = file.originalname;
+
+    await schedule.save();
+    return res.send({ mensagem: "Arquivo Anexado" });
+    } catch (err: any) {
+      throw new AppError(err.message);
+  }
+};
+
+export const deleteMedia = async (
+  req: Request,
+  res: Response
+): Promise<Response> => {
+  const { id } = req.params;
+
+  try {
+    const schedule = await Schedule.findByPk(id);
+    const filePath = path.resolve("public", schedule.mediaPath);
+    const fileExists = fs.existsSync(filePath);
+    if (fileExists) {
+      fs.unlinkSync(filePath);
+    }
+    schedule.mediaPath = null;
+    schedule.mediaName = null;
+    await schedule.save();
+    return res.send({ mensagem: "Arquivo Excluído" });
+    } catch (err: any) {
+      throw new AppError(err.message);
+  }
 };

@@ -27,7 +27,9 @@ import chatRoutes from "./chatRoutes";
 import invoiceRoutes from "./invoicesRoutes";
 import subscriptionRoutes from "./subScriptionRoutes";
 import ticketTagRoutes from "./ticketTagRoutes";
-
+import filesRoutes from "./filesRoutes";
+import promptRoutes from "./promptRouter";
+import queueIntegrationRoutes from "./queueIntegrationRoutes";
 const routes = Router();
 
 routes.use(userRoutes);
@@ -43,7 +45,6 @@ routes.use(queueRoutes);
 routes.use(companyRoutes);
 routes.use(planRoutes);
 routes.use(ticketNoteRoutes);
-routes.use(ticketTagRoutes);
 routes.use(quickMessageRoutes);
 routes.use(helpRoutes);
 routes.use(dashboardRoutes);
@@ -58,6 +59,9 @@ routes.use(announcementRoutes);
 routes.use(chatRoutes);
 routes.use(subscriptionRoutes);
 routes.use(invoiceRoutes);
-
+routes.use(ticketTagRoutes);
+routes.use(filesRoutes);
+routes.use(promptRoutes);
+routes.use(queueIntegrationRoutes);
 
 export default routes;

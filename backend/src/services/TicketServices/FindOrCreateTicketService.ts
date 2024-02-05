@@ -26,7 +26,8 @@ const FindOrCreateTicketService = async (
         [Op.or]: ["open", "pending", "closed"]
       },
       contactId: groupContact ? groupContact.id : contact.id,
-      companyId
+      companyId,
+      whatsappId
     },
     order: [["id", "DESC"]]
   });

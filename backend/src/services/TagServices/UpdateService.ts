@@ -8,7 +8,7 @@ interface TagData {
   id?: number;
   name?: string;
   color?: string;
-  kanban?: string;
+  kanban?: number;
 }
 
 interface Request {
@@ -37,7 +37,7 @@ const UpdateUserService = async ({
   await tag.update({
     name,
     color,
-	kanban
+    kanban
   });
 
   await tag.reload();

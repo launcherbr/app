@@ -87,7 +87,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
               await sleep(2000)
               await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, textMessage);
             } catch (error) {
-              //console.log('Não consegui enviar a mensagem!')
+
             }
 
 
@@ -290,7 +290,6 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
               await sleep(2000)
               await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
             } catch (error) {
-              //console.log('Não consegui enviar a mensagem!')
             }
             var optionsc = {
               method: 'GET',
@@ -655,7 +654,6 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
               await sleep(2000)
               await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
             } catch (error) {
-              //console.log('Não consegui enviar a mensagem!')
             }
             var options = {
               method: 'GET',
@@ -691,7 +689,6 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                   await sleep(2000)
                   await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
                 } catch (error) {
-                  //console.log('Não consegui enviar a mensagem!')
                 }
               } else {
 
@@ -749,7 +746,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                   valorCorrigido = valor.replace(".", ",");
                   datavencCorrigida = datavenc.split('-').reverse().join('/')
 
-                  //console.log(response.data?.registros[0])
+
                   //INFORMAÇÕES BOLETO
                   const bodyBoleto = {
                     text: formatBody(`Segue a segunda-via da sua Fatura!\n\n*Fatura:* ${idboleto}\n*Nome:* ${nome}\n*Valor:* R$ ${valorCorrigido}\n*Data Vencimento:* ${datavencCorrigida}\n\nVou mandar o *código de barras* na próxima mensagem para ficar mais fácil para você copiar!`, contact),
@@ -1273,7 +1270,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
               await sleep(2000)
               await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
             } catch (error) {
-              //console.log('Não consegui enviar a mensagem!')
+
             }
             var options = {
               method: 'GET',
@@ -1294,7 +1291,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
             };
 
             axios.request(options as any).then(async function (response) {
-              //console.log(response.data)
+
               if (response.data.type === 'error') {
                 const body = {
                   text: formatBody(`*Opss!!!!*\nOcorreu um erro! Digite *#* e fale com um *Atendente*!`, contact),
@@ -1309,7 +1306,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                   await sleep(2000)
                   await wbot.sendMessage(`${ticket.contact.number}@${ticket.isGroup ? "g.us" : "s.whatsapp.net"}`, body);
                 } catch (error) {
-                  //console.log('Não consegui enviar a mensagem!')
+
                 }
               } else {
 
@@ -1471,7 +1468,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
                              } */
 
                     }).catch(async function (error) {
-                      console.log('LINHA 738: ' + error)
+
                       const bodyerro = {
                         text: formatBody(`Ops! Ocorreu um erro digite *#* e fale com um atendente!`, contact),
                       };
@@ -1498,7 +1495,7 @@ export const provider = async (ticket: Ticket, msg: proto.IWebMessageInfo, compa
 
                   //
                 }).catch(async function (error) {
-                  console.log('LINHA 746: ' + error)
+
                   const bodyerro = {
                     text: formatBody(`Ops! Ocorreu um erro digite *#* e fale com um atendente!`, contact),
                   };

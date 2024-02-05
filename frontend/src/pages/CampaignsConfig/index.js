@@ -178,10 +178,17 @@ const CampaignsConfig = () => {
                   onChange={(e) => handleOnChangeSettings(e)}
                 >
                   <MenuItem value={0}>Não definido</MenuItem>
-                  <MenuItem value={5}>5 mensagens</MenuItem>
-                  <MenuItem value={10}>10 mensagens</MenuItem>
-                  <MenuItem value={15}>15 mensagens</MenuItem>
-                  <MenuItem value={20}>20 mensagens</MenuItem>
+                  <MenuItem value={1}>1 segundo</MenuItem>
+                  <MenuItem value={5}>5 segundos</MenuItem>
+                  <MenuItem value={10}>10 segundos</MenuItem>
+                  <MenuItem value={15}>15 segundos</MenuItem>
+                  <MenuItem value={20}>20 segundos</MenuItem>
+                  <MenuItem value={30}>30 segundos</MenuItem>
+                  <MenuItem value={40}>40 segundos</MenuItem>
+                  <MenuItem value={60}>60 segundos</MenuItem>
+                  <MenuItem value={80}>80 segundos</MenuItem>
+                  <MenuItem value={100}>100 segundos</MenuItem>
+                  <MenuItem value={120}>120 segundos</MenuItem>
                 </Select>
               </FormControl>
             </Grid>
@@ -203,11 +210,17 @@ const CampaignsConfig = () => {
                   onChange={(e) => handleOnChangeSettings(e)}
                 >
                   <MenuItem value={0}>Sem Intervalo</MenuItem>
+                  <MenuItem value={1}>1 segundo</MenuItem>
+                  <MenuItem value={5}>5 segundos</MenuItem>
+                  <MenuItem value={10}>10 segundos</MenuItem>
+                  <MenuItem value={15}>15 segundos</MenuItem>
                   <MenuItem value={20}>20 segundos</MenuItem>
                   <MenuItem value={30}>30 segundos</MenuItem>
                   <MenuItem value={40}>40 segundos</MenuItem>
-                  <MenuItem value={50}>50 segundos</MenuItem>
                   <MenuItem value={60}>60 segundos</MenuItem>
+                  <MenuItem value={80}>80 segundos</MenuItem>
+                  <MenuItem value={100}>100 segundos</MenuItem>
+                  <MenuItem value={120}>120 segundos</MenuItem>
                 </Select>
               </FormControl>
             </Grid>

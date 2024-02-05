@@ -72,6 +72,9 @@ class TicketTraking extends Model<TicketTraking> {
 
   @Column
   ratingAt: Date;
+
+  @Column
+  chatbotAt: Date;
 }
 
 export default TicketTraking;

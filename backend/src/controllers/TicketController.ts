@@ -28,6 +28,10 @@ interface TicketData {
   status: string;
   queueId: number;
   userId: number;
+  whatsappId: string;
+  useIntegration: boolean;
+  promptId: number;
+  integrationId: number;
 }
 
 export const index = async (req: Request, res: Response): Promise<Response> => {
@@ -82,6 +86,27 @@ export const index = async (req: Request, res: Response): Promise<Response> => {
   return res.status(200).json({ tickets, count, hasMore });
 };
 
+export const store = async (req: Request, res: Response): Promise<Response> => {
+  const { contactId, status, userId, queueId, whatsappId }: TicketData = req.body;
+  const { companyId } = req.user;
+
+  const ticket = await CreateTicketService({
+    contactId,
+    status,
+    userId,
+    companyId,
+    queueId,
+    whatsappId
+  });
+
+  const io = getIO();
+  io.to(ticket.status).emit(`company-${companyId}-ticket`, {
+    action: "update",
+    ticket
+  });
+  return res.status(200).json(ticket);
+};
+
 export const kanban = async (req: Request, res: Response): Promise<Response> => {
   const {
     pageNumber,
@@ -104,7 +129,6 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
   let tagsIds: number[] = [];
   let usersIds: number[] = [];
 
-
   if (queueIdsStringified) {
     queueIds = JSON.parse(queueIdsStringified);
   }
@@ -116,7 +140,6 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
   if (userIdsStringified) {
     usersIds = JSON.parse(userIdsStringified);
   }
-
 
   const { tickets, count, hasMore } = await ListTicketsServiceKanban({
     searchParam,
@@ -134,29 +157,7 @@ export const kanban = async (req: Request, res: Response): Promise<Response> => 
 
   });
 
-  //console.log("ticket controller 82");
-  
   return res.status(200).json({ tickets, count, hasMore });
-};
-
-export const store = async (req: Request, res: Response): Promise<Response> => {
-  const { contactId, status, userId, queueId }: TicketData = req.body;
-  const { companyId } = req.user;
-
-  const ticket = await CreateTicketService({
-    contactId,
-    status,
-    userId,
-    companyId,
-    queueId
-  });
-
-  const io = getIO();
-  io.to(ticket.status).emit(`company-${companyId}-ticket`, {
-    action: "update",
-    ticket
-  });
-  return res.status(200).json(ticket);
 };
 
 export const show = async (req: Request, res: Response): Promise<Response> => {
